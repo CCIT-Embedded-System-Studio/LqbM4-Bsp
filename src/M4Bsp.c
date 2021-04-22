@@ -12,4 +12,10 @@
 
 #include "M4Bsp.h"
 
-
+void M4_Led_Set(uint8_t led)
+{
+    HAL_GPIO_WritePin(GPIOC, LED_ALL_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOC, 0x0100 << (led & 0x07), GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET);
+}

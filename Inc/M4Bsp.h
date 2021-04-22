@@ -9,6 +9,14 @@
  * 
  * @SPDX-License-Identifier Apache-2.0
  */
+
 #pragma once
 
+#include "M4Bsp_conf.h"
 
+/**
+ * @brief Set led
+ * 
+ * @param led led number in 0 ~ 7
+ */
+void M4_Led_Set(uint8_t led);
