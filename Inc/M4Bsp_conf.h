@@ -15,3 +15,7 @@
 
 #define M4_KEY_ENABLE
 
+#define M4_R37_ENABLE 
+
+#define M4_R38_ENABLE
+
