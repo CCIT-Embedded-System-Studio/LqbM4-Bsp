@@ -46,6 +46,7 @@
 void M4_Led_Set(uint16_t led);
 
 #endif
+
 #ifdef M4_KEY_ENABLE
 
 // Keys max sum
@@ -91,6 +92,7 @@ typedef struct KeyInfo KeyInfo_t;
 
 /**
  * @brief Scan M4 board key status
+ * 
  * @return void
  */
 void M4_Key_Scan(void);
@@ -101,6 +103,7 @@ void M4_Key_Scan(void);
  * @param KeyID Key id, value can is M4_KEY_B1
  * @param KeyStatus Now keys's status
  * @param DownTim The number of milliseconds(ms) to press the button
+ * 
  * @return void
  */
 __weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim);
@@ -109,8 +112,34 @@ __weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t Down
 
 #ifdef M4_R37_ENABLE
 
+#ifndef M4_R37_BASE_VOLT
+#define M4_R37_BASE_VOLT 3.3
+#endif
+
+/**
+ * @brief Get R37 adc value
+ * 
+ * @param void
+ * 
+ * @return uint16_t R37 value in 0 ~ M4_R37_BASE_VOLT
+ */
+uint16_t M4_R37_GetValue(void);
+
 #endif
 
 #ifdef M4_R38_ENABLE
+
+#ifndef M4_R38_BASE_VOLT
+#define M4_R38_BASE_VOLT 3.3
+#endif
+
+/**
+ * @brief Get R38 adc value
+ * 
+ * @param void
+ * 
+ * @return uint16_t R38 value in 0 ~ M4_R38_BASE_VOLT
+ */
+uint16_t M4_R38_GetValue(void);
 
 #endif

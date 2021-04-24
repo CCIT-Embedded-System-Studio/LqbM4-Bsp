@@ -77,15 +77,33 @@ void M4_Key_Scan(void)
 
 __weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim)
 {
-    
+
 }
 
 #endif
 
 #ifdef M4_R37_ENABLE
 
+extern ADC_HandleTypeDef hadc2;
+
+uint16_t M4_R37_GetValue(void)
+{
+    HAL_ADC_Start(&hadc2);
+    uint16_t ret = (HAL_ADC_GetValue(&hadc2)  / 4095.0) *M4_R37_BASE_VOLT;
+    HAL_ADC_Stop(&hadc2);
+}
+
 #endif
 
 #ifdef M4_R38_ENABLE
+
+extern ADC_HandleTypeDef hadc1;
+
+uint16_t M4_R38_GetValue(void)
+{
+    HAL_ADC_Start(&hadc1);
+    uint16_t ret = (HAL_ADC_GetValue(&hadc1)  / 4095.0) * M4_R38_BASE_VOLT;
+    HAL_ADC_Stop(&hadc1);
+}
 
 #endif
