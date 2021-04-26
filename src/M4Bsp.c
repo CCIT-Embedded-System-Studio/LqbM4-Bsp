@@ -138,3 +138,82 @@ void USART1_IRQHandler(void)
 }
 
 #endif
+
+#ifdef M4_EEPROM_ENABLE
+
+void M4_EEPROM_Read(uint8_t addr, uint8_t *buf, uint8_t size)
+{
+    I2CStart();
+    I2CSendByte(M4_IIC_EEPROM_DEVICE_ADDRESS_WRITE);
+    I2CWaitAck();
+
+    I2CSendByte(addr);
+    I2CWaitAck();
+
+    I2CStart();
+    I2CSendByte(M4_IIC_EEPROM_DEVICE_ADDRESS_READ);
+    I2CWaitAck();
+
+    while (1)
+    {
+        *buf = I2CReceiveByte();
+        if (size == 0)
+            break;
+        else
+            I2CSendAck();
+        --size;
+        ++buf;
+    }
+    I2CSendNotAck();
+    I2CStop();
+}
+
+void M4_EEPROM_Write(uint8_t addr, uint8_t *buf, uint8_t size)
+{
+    I2CStart();
+    I2CSendByte(M4_IIC_EEPROM_DEVICE_ADDRESS_WRITE);
+    I2CWaitAck();
+
+    I2CSendByte(addr);
+    I2CWaitAck();
+    while (size != 0 && (*buf != '\0'))
+    {
+        I2CSendByte(*buf);
+        I2CWaitAck();
+        --size;
+        ++buf;
+    }
+
+    I2CStop();
+    HAL_Delay(5);
+}
+
+#endif
+
+#ifdef M4_RES_ENABLE
+
+uint8_t M4_Res_Read(void)
+{
+    I2CStart();
+    I2CSendByte(M4_IIC_RES_DEVICE_ADDRESS_READ);
+    I2CWaitAck();
+
+    uint8_t value = I2CReceiveByte();
+    I2CSendNotAck();
+    I2CStop();
+
+    return value;
+}
+
+void M4_Res_Write(uint8_t value)
+{
+    I2CStart();
+    I2CSendByte(M4_IIC_RES_DEVICE_ADDRESS_WRITE);
+    I2CWaitAck();
+
+    I2CSendByte(value);
+    I2CWaitAck();
+    I2CStop();
+}
+
+#endif

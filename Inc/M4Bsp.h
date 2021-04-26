@@ -14,7 +14,9 @@
 
 #include "M4Bsp_conf.h"
 #include "stm32g4xx_hal.h"
-#include "math.h"
+#include "stdio.h"
+#include "string.h"
+#include "i2c.h"
 
 #ifdef M4_LED_ENABLE
 
@@ -55,7 +57,7 @@ void M4_Led_Set(uint16_t led);
 // Delay for one key scanf
 #define M4_KEY_SCAN_DELAY 10
 
-// Keys status for down or up 
+// Keys status for down or up
 #define M4_KEY_UP 0x00
 #define M4_KEY_DOWN 0x01
 
@@ -78,9 +80,9 @@ void M4_Led_Set(uint16_t led);
 #define M4_KEY_B4 0x04
 
 // Math function
-#define ABS(x) ((x < 0)? -x : x) 
+#define ABS(x) ((x < 0) ? -x : x)
 
-// Save key info 
+// Save key info
 struct KeyInfo
 {
     GPIO_TypeDef *Port;
@@ -153,5 +155,59 @@ uint16_t M4_R38_GetValue(void);
 typedef void (*UartCallback)(void);
 
 void M4_Uart_RxCallback(UartCallback callback);
+
+#endif
+
+#ifdef M4_EEPROM_ENABLE
+
+#define M4_IIC_EEPROM_DEVICE_ADDRESS_READ 0xA1
+#define M4_IIC_EEPROM_DEVICE_ADDRESS_WRITE 0xA0
+
+/**
+ * @brief Read data from the specified address of EEPROM(M24C02)
+ * 
+ * @param addr Start address to be read
+ * @param buf Read buff pointer
+ * @param size Size to be read
+ * 
+ * @return void
+ */
+void M4_EEPROM_Read(uint8_t addr, uint8_t *buf, uint8_t size);
+
+/**
+ * @brief Write data to the specified address of EEPROM(M24C02)
+ * 
+ * @param addr Start address to be written
+ * @param buf Written buff pointer
+ * @param size Size to be Written
+ * 
+ * @return void
+ */
+void M4_EEPROM_Write(uint8_t addr, uint8_t *buf, uint8_t size);
+
+#endif
+
+#ifdef M4_RES_ENABLE
+
+#define M4_IIC_RES_DEVICE_ADDRESS_READ 0x5F
+#define M4_IIC_RES_DEVICE_ADDRESS_WRITE 0x5E
+
+/**
+ * @brief Read the resistance of the digital resistor(MCP4017T)
+ * 
+ * @return uint8_t digital resistor(MCP4017T) resistance value
+ *         value range: [1, 3, 7, 15, 31, 63, 127]
+ */
+uint8_t M4_Res_Read(void);
+
+/**
+ * @brief Write the resistance of the digital resistor(MCP4017T)
+ * 
+ * @param value Resistance value to be written
+ *              value range [0~127]
+ * 
+ * @return void
+ */
+void M4_Res_Write(uint8_t value);
 
 #endif
