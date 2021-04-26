@@ -82,7 +82,7 @@ __weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t Down
 
 extern ADC_HandleTypeDef hadc2;
 
-uint16_t M4_R37_GetValue(void)
+__INLINE uint16_t M4_R37_GetValue(void)
 {
     HAL_ADC_Start(&hadc2);
     uint16_t ret = (HAL_ADC_GetValue(&hadc2) / 4095.0) * M4_R37_BASE_VOLT;
@@ -96,7 +96,7 @@ uint16_t M4_R37_GetValue(void)
 
 extern ADC_HandleTypeDef hadc1;
 
-uint16_t M4_R38_GetValue(void)
+__INLINE uint16_t M4_R38_GetValue(void)
 {
     HAL_ADC_Start(&hadc1);
     uint16_t ret = (HAL_ADC_GetValue(&hadc1) / 4095.0) * M4_R38_BASE_VOLT;
@@ -135,6 +135,11 @@ void USART1_IRQHandler(void)
         HAL_UART_Receive_DMA(&huart1, (uint8_t *)RecvBuf, M4_UART_RECV_SIZE);
     }
     HAL_UART_IRQHandler(&huart1);
+}
+
+__INLINE void M4_Uart_Transmit(uint8_t data, uint32_t len)
+{
+    HAL_UART_Transmit(&huart1, data, len, 10);
 }
 
 #endif
@@ -192,7 +197,7 @@ void M4_EEPROM_Write(uint8_t addr, uint8_t *buf, uint8_t size)
 
 #ifdef M4_RES_ENABLE
 
-uint8_t M4_Res_Read(void)
+__INLINE uint8_t M4_Res_Read(void)
 {
     I2CStart();
     I2CSendByte(M4_IIC_RES_DEVICE_ADDRESS_READ);
@@ -205,7 +210,7 @@ uint8_t M4_Res_Read(void)
     return value;
 }
 
-void M4_Res_Write(uint8_t value)
+__INLINE void M4_Res_Write(uint8_t value)
 {
     I2CStart();
     I2CSendByte(M4_IIC_RES_DEVICE_ADDRESS_WRITE);

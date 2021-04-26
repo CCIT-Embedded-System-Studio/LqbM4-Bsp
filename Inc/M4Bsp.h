@@ -156,6 +156,16 @@ typedef void (*UartCallback)(void);
 
 void M4_Uart_RxCallback(UartCallback callback);
 
+/**
+ * @brief Uart data transmit
+ * 
+ * @param data Data buffer pointer
+ * @param len Data length
+ * 
+ * @return void
+ */
+void M4_Uart_Transmit(uint8_t data, uint32_t len);
+
 #endif
 
 #ifdef M4_EEPROM_ENABLE
