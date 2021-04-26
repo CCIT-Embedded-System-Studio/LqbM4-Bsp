@@ -143,3 +143,15 @@ uint16_t M4_R37_GetValue(void);
 uint16_t M4_R38_GetValue(void);
 
 #endif
+
+#ifdef M4_UART_ENABLE
+
+#ifndef M4_UART_RECV_SIZE
+#define M4_UART_RECV_SIZE 32
+#endif
+
+typedef void (*UartCallback)(void);
+
+void M4_Uart_RxCallback(UartCallback callback);
+
+#endif

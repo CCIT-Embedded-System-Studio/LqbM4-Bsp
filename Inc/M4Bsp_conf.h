@@ -19,3 +19,4 @@
 
 #define M4_R38_ENABLE
 
+#define M4_UART_ENABLE

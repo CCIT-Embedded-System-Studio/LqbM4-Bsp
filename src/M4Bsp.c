@@ -41,7 +41,6 @@ static KeyInfo_t KeyList[M4_KEY_SUM_MAX] = {
     {M4_KEY_B4_PORT, M4_KEY_B4_PIN, M4_KEY_UP, 0x00}};
 
 static uint32_t KeyLastTick = 0;
-static uint8_t KeyClick = 0x00;
 
 void M4_Key_Scan(void)
 {
@@ -75,10 +74,7 @@ void M4_Key_Scan(void)
     KeyLastTick = NowTick;
 }
 
-__weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim)
-{
-
-}
+__weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim) {}
 
 #endif
 
@@ -89,8 +85,9 @@ extern ADC_HandleTypeDef hadc2;
 uint16_t M4_R37_GetValue(void)
 {
     HAL_ADC_Start(&hadc2);
-    uint16_t ret = (HAL_ADC_GetValue(&hadc2)  / 4095.0) *M4_R37_BASE_VOLT;
+    uint16_t ret = (HAL_ADC_GetValue(&hadc2) / 4095.0) * M4_R37_BASE_VOLT;
     HAL_ADC_Stop(&hadc2);
+    return ret;
 }
 
 #endif
@@ -102,8 +99,42 @@ extern ADC_HandleTypeDef hadc1;
 uint16_t M4_R38_GetValue(void)
 {
     HAL_ADC_Start(&hadc1);
-    uint16_t ret = (HAL_ADC_GetValue(&hadc1)  / 4095.0) * M4_R38_BASE_VOLT;
+    uint16_t ret = (HAL_ADC_GetValue(&hadc1) / 4095.0) * M4_R38_BASE_VOLT;
     HAL_ADC_Stop(&hadc1);
+    return ret;
+}
+
+#endif
+
+#ifdef M4_UART_ENABLE
+
+extern UART_HandleTypeDef huart1;
+
+static uint8_t RecvBuf[M4_UART_RECV_SIZE] = {};
+static UartCallback RxCallback = NULL;
+
+void M4_Uart_RxCallback(UartCallback callback)
+{
+    RxCallback = callback;
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+    HAL_UART_Receive_DMA(&huart1, (uint8_t *)RecvBuf, M4_UART_RECV_SIZE);
+}
+
+void USART1_IRQHandler(void)
+{
+    if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
+    {
+        // Clear IDLE Flag
+        __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+        HAL_UART_DMAStop(&huart1);
+        RxCallback();
+        memset((void *)RecvBuf, 0, M4_UART_RECV_SIZE);
+        HAL_UART_Receive_DMA(&huart1, (uint8_t *)RecvBuf, M4_UART_RECV_SIZE);
+    }
+    HAL_UART_IRQHandler(&huart1);
 }
 
 #endif
