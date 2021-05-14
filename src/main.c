@@ -122,9 +122,9 @@ int main(void)
     char s[22] = {0};
     uint16_t R39ICPeriod = M4_R39IC_GetPeriod();
     uint16_t R40ICPeriod = M4_R40IC_GetPeriod();
-    sprintf(s, "  R39IC Freq:%u   ", R39ICPeriod);
+    sprintf(s, " R39IC Period:%u  ", R39ICPeriod);
     LCD_DisplayStringLine(Line3,(u8*)s);
-    sprintf(s, "  R40IC Freq:%u   ", R40ICPeriod);
+    sprintf(s, " R40IC Period:%u  ", R40ICPeriod);
     LCD_DisplayStringLine(Line4,(u8*)s);
     /* USER CODE END WHILE */
 
