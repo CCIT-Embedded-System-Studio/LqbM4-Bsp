@@ -18,6 +18,9 @@
 #include "string.h"
 #include "i2c.h"
 
+// Math function
+#define ABS(x) ((x < 0) ? -x : x)
+
 #ifdef M4_LED_ENABLE
 
 // Latches gpio port and gpio pins
@@ -78,9 +81,6 @@ void M4_Led_Set(uint16_t led);
 #define M4_KEY_B2 0x02
 #define M4_KEY_B3 0x03
 #define M4_KEY_B4 0x04
-
-// Math function
-#define ABS(x) ((x < 0) ? -x : x)
 
 // Save key info
 struct KeyInfo
@@ -164,7 +164,7 @@ void M4_Uart_RxCallback(UartCallback callback);
  * 
  * @return void
  */
-void M4_Uart_Transmit(uint8_t data, uint32_t len);
+void M4_Uart_Transmit(uint8_t *data, uint32_t len);
 
 #endif
 
@@ -219,5 +219,45 @@ uint8_t M4_Res_Read(void);
  * @return void
  */
 void M4_Res_Write(uint8_t value);
+
+#endif
+
+#ifdef M4_R39IC_ENABLE
+
+/**
+ * @brief Start input capture for R39 controlled XL555 pulse
+ * 
+ */
+void M4_R39IC_Start(void);
+
+/**
+ * @brief Get R39 controlled XL555 pulse period(us)
+ * 
+ * @return uint16_t pulse freq (Hz)
+ */
+uint16_t M4_R39IC_GetPeriod(void);
+
+#endif
+
+#ifdef M4_R40IC_ENABLE
+
+/**
+ * @brief Start input capture for R40 controlled XL555 pulse
+ * 
+ */
+void M4_R40IC_Start(void);
+
+/**
+ * @brief Get R40 controlled XL555 pulse period(us)
+ * 
+ * @return uint16_t pulse freq (Hz)
+ */
+uint16_t M4_R40IC_GetPeriod(void);
+
+#endif
+
+#if (defined(M4_R39IC_ENABLE) || defined(M4_R39IC_ENABLE))
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 
 #endif

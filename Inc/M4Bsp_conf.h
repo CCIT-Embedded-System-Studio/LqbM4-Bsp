@@ -24,3 +24,7 @@
 #define M4_EEPROM_ENABLE
 
 #define M4_RES_ENABLE
+
+#define M4_R39IC_ENABLE
+
+#define M4_R40IC_ENABLE

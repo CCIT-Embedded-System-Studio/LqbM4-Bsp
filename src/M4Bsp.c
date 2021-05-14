@@ -63,7 +63,6 @@ void M4_Key_Scan(void)
         {
             if (KeyList[i].Status == M4_KEY_DOWN)
             {
-
                 KeyList[i].TimCount += ABS(((int64_t)NowTick - KeyLastTick));
                 M4_Key_Scan_Callback(i + 1, M4_KEY_DOWN, KeyList[i].TimCount);
             }
@@ -137,7 +136,7 @@ void USART1_IRQHandler(void)
     HAL_UART_IRQHandler(&huart1);
 }
 
-__INLINE void M4_Uart_Transmit(uint8_t data, uint32_t len)
+__INLINE void M4_Uart_Transmit(uint8_t *data, uint32_t len)
 {
     HAL_UART_Transmit(&huart1, data, len, 10);
 }
@@ -219,6 +218,71 @@ __INLINE void M4_Res_Write(uint8_t value)
     I2CSendByte(value);
     I2CWaitAck();
     I2CStop();
+}
+
+#endif
+
+#ifdef M4_R39IC_ENABLE
+
+extern TIM_HandleTypeDef htim3;
+
+static uint32_t R39ICLastTick = 0;
+static uint16_t R39ICPeriod = 0;
+
+__INLINE void M4_R39IC_Start(void)
+{
+    __HAL_TIM_SET_PRESCALER(&htim3, 80 - 1);
+    HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+}
+
+__INLINE uint16_t M4_R39IC_GetPeriod(void)
+{
+    return R39ICPeriod;
+}
+
+#endif
+
+#ifdef M4_R40IC_ENABLE
+
+extern TIM_HandleTypeDef htim2;
+
+static uint32_t R40ICLastTick = 0;
+static uint16_t R40ICPeriod = 0;
+
+__INLINE void M4_R40IC_Start(void)
+{
+    __HAL_TIM_SET_PRESCALER(&htim2, 80 - 1);
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+}
+
+__INLINE uint16_t M4_R40IC_GetPeriod(void)
+{
+    return R40ICPeriod;
+}
+
+#endif
+
+#if (defined(M4_R39IC_ENABLE) || defined(M4_R39IC_ENABLE))
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    uint32_t NowTick = 0;
+#ifdef M4_R39IC_ENABLE
+    if (htim == &htim3)
+    {
+        NowTick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1);
+        R39ICPeriod = ABS((long)NowTick - (long)R39ICLastTick);
+        R39ICLastTick = NowTick;
+    }
+#endif
+#ifdef M4_R40IC_ENABLE
+    if (htim == &htim2)
+    {
+        NowTick = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+        R40ICPeriod = ABS((long)NowTick - (long)R40ICLastTick);
+        R40ICLastTick = NowTick;
+    }
+#endif
 }
 
 #endif
