@@ -40,6 +40,7 @@ static KeyInfo_t KeyList[M4_KEY_SUM_MAX] = {
     {M4_KEY_B3_PORT, M4_KEY_B3_PIN, M4_KEY_UP, 0x00},
     {M4_KEY_B4_PORT, M4_KEY_B4_PIN, M4_KEY_UP, 0x00}};
 
+// Lsat scanf systick
 static uint32_t KeyLastTick = 0;
 
 void M4_Key_Scan(void)
@@ -224,15 +225,15 @@ __INLINE void M4_Res_Write(uint8_t value)
 
 #ifdef M4_R39IC_ENABLE
 
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim16;
 
 static uint32_t R39ICLastTick = 0;
 static uint16_t R39ICPeriod = 0;
 
 __INLINE void M4_R39IC_Start(void)
 {
-    __HAL_TIM_SET_PRESCALER(&htim3, 80 - 1);
-    HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+    __HAL_TIM_SET_PRESCALER(&htim16, 80 - 1);
+    HAL_TIM_IC_Start_IT(&htim16, TIM_CHANNEL_1);
 }
 
 __INLINE uint16_t M4_R39IC_GetPeriod(void)
@@ -244,15 +245,15 @@ __INLINE uint16_t M4_R39IC_GetPeriod(void)
 
 #ifdef M4_R40IC_ENABLE
 
-extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim8;
 
 static uint32_t R40ICLastTick = 0;
 static uint16_t R40ICPeriod = 0;
 
 __INLINE void M4_R40IC_Start(void)
 {
-    __HAL_TIM_SET_PRESCALER(&htim2, 80 - 1);
-    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+    __HAL_TIM_SET_PRESCALER(&htim8, 80 - 1);
+    HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1);
 }
 
 __INLINE uint16_t M4_R40IC_GetPeriod(void)
@@ -268,21 +269,86 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
     uint32_t NowTick = 0;
 #ifdef M4_R39IC_ENABLE
-    if (htim == &htim3)
+    if (htim == &htim16)
     {
-        NowTick = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1);
+        NowTick = HAL_TIM_ReadCapturedValue(&htim16, TIM_CHANNEL_1);
         R39ICPeriod = ABS((long)NowTick - (long)R39ICLastTick);
         R39ICLastTick = NowTick;
     }
 #endif
 #ifdef M4_R40IC_ENABLE
-    if (htim == &htim2)
+    if (htim == &htim8)
     {
-        NowTick = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+        NowTick = HAL_TIM_ReadCapturedValue(&htim8, TIM_CHANNEL_1);
         R40ICPeriod = ABS((long)NowTick - (long)R40ICLastTick);
         R40ICLastTick = NowTick;
     }
 #endif
 }
+
+#endif
+
+#ifdef M4_EX_ADCKEY_ENABLE
+
+uint16_t ADCKeyValueArr[M4_EX_ADCKEY_SUM_MAX] = {
+    M4_EX_ADCKEY_S1_ADCVALUE,
+    M4_EX_ADCKEY_S2_ADCVALUE,
+    M4_EX_ADCKEY_S3_ADCVALUE,
+    M4_EX_ADCKEY_S4_ADCVALUE,
+    M4_EX_ADCKEY_S5_ADCVALUE,
+    M4_EX_ADCKEY_S6_ADCVALUE,
+    M4_EX_ADCKEY_S7_ADCVALUE,
+    M4_EX_ADCKEY_S8_ADCVALUE};
+
+ADCKey_t ADCKeyList[M4_EX_ADCKEY_SUM_MAX] = {0};
+
+// Lsat scanf systick
+static uint32_t ADCKeyLastTick = 0;
+
+__INLINE uint16_t M4_EX_ADCKey_GetValue(void)
+{
+
+    HAL_ADC_Start(&hadc2);
+    uint16_t ret = HAL_ADC_GetValue(&hadc2);
+    HAL_ADC_Stop(&hadc2);
+    return ret;
+}
+
+void M4_EX_ADCKey_Scan(void)
+{
+    uint32_t ADCKeyNowTick = HAL_GetTick();
+    uint16_t ADCKeyValue = M4_EX_ADCKey_GetValue();
+
+    if (ADCKeyNowTick - ADCKeyLastTick < M4_EX_ADCKEY_SCAN_DELAY)
+        return;
+
+    for (size_t i = 0; i < M4_EX_ADCKEY_SUM_MAX; i++)
+    {
+        if (ADCKeyValue <= ADCKeyValueArr[i])
+        {
+            // Now key down
+            if (ADCKeyList[i].Status == M4_EX_ADCKEY_DOWN)
+            {
+                ADCKeyList[i].TimCount += ABS(ADCKeyNowTick - ADCKeyLastTick);
+                M4_EX_ADCKey_Scan_Callback(i + 1, M4_EX_ADCKEY_DOWN, ADCKeyList[i].TimCount);
+            }
+            ADCKeyList[i].Status = M4_EX_ADCKEY_DOWN;
+            ADCKeyValue = 0xffff;
+        }
+        else
+        {
+            // Now key up
+            if (ADCKeyList[i].Status == M4_EX_ADCKEY_DOWN)
+            {
+                M4_EX_ADCKey_Scan_Callback(i + 1, M4_EX_ADCKEY_UP, ADCKeyList[i].TimCount);
+                ADCKeyList[i].TimCount = 0;
+            }
+            ADCKeyList[i].Status = M4_EX_ADCKEY_UP;
+        }
+    }
+    ADCKeyLastTick = ADCKeyNowTick;
+}
+
+__weak void M4_EX_ADCKey_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim){};
 
 #endif

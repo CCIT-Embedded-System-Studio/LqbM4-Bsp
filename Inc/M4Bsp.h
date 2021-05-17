@@ -108,7 +108,7 @@ void M4_Key_Scan(void);
  * 
  * @return void
  */
-__weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim);
+void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim);
 
 #endif
 
@@ -259,5 +259,58 @@ uint16_t M4_R40IC_GetPeriod(void);
 #if (defined(M4_R39IC_ENABLE) || defined(M4_R39IC_ENABLE))
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
+
+#endif
+
+#ifdef M4_EX_ADCKEY_ENABLE
+
+// ADC keys max sum
+#define M4_EX_ADCKEY_SUM_MAX 8
+
+#define M4_EX_ADCKEY_S1 0x01
+#define M4_EX_ADCKEY_S2 0x02
+#define M4_EX_ADCKEY_S3 0x03
+#define M4_EX_ADCKEY_S4 0x04
+#define M4_EX_ADCKEY_S5 0x05
+#define M4_EX_ADCKEY_S6 0x06
+#define M4_EX_ADCKEY_S7 0x07
+#define M4_EX_ADCKEY_S8 0x08
+
+#define M4_EX_ADCKEY_S1_ADCVALUE 0
+#define M4_EX_ADCKEY_S2_ADCVALUE 200  // 140
+#define M4_EX_ADCKEY_S3_ADCVALUE 600  // 540
+#define M4_EX_ADCKEY_S4_ADCVALUE 1000 // 960
+#define M4_EX_ADCKEY_S5_ADCVALUE 1400 // 1320
+#define M4_EX_ADCKEY_S6_ADCVALUE 1800 // 1760
+#define M4_EX_ADCKEY_S7_ADCVALUE 2300 // 2230
+#define M4_EX_ADCKEY_S8_ADCVALUE 2800 // 2780
+
+#define M4_EX_ADCKEY_UP 0x00
+#define M4_EX_ADCKEY_DOWN 0x01
+
+#define M4_EX_ADCKEY_SCAN_DELAY 15
+
+struct ADCKey
+{
+    uint8_t Status;
+    uint32_t TimCount;
+};
+
+typedef struct ADCKey ADCKey_t;
+
+uint16_t M4_EX_ADCKey_GetValue(void);
+
+void M4_EX_ADCKey_Scan(void);
+
+/**
+ * @brief Rewrite by user, this function in M4_EX_ADCKey_Scan() call
+ * 
+ * @param KeyID Key id, value can is M4_KEY_B1
+ * @param KeyStatus Now keys's status
+ * @param DownTim The number of milliseconds(ms) to press the button
+ * 
+ * @return void
+ */
+void M4_EX_ADCKey_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim);
 
 #endif
