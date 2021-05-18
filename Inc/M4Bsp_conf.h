@@ -33,3 +33,5 @@
 /*********** Expansion board function enable ***********/
 /******* ADC Key function(S1,S2,S3,S4,S5,S6,S7,S8) *******/
 #define M4_EX_ADCKEY_ENABLE
+/******* SEG function *******/
+#define M4_EX_SEG_ENABLE

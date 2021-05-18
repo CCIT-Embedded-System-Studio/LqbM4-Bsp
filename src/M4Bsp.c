@@ -352,3 +352,29 @@ void M4_EX_ADCKey_Scan(void)
 __weak void M4_EX_ADCKey_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim){};
 
 #endif
+
+#ifdef M4_EX_SEG_ENABLE
+
+static uint8_t SegTable[17] =
+    {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x00};
+
+void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3)
+{
+    uint32_t seg = (SegTable[seg3 % M4_EX_SEG_TABLE_MAX] << 16) |
+                   (SegTable[seg2 % M4_EX_SEG_TABLE_MAX] << 8) |
+                   (SegTable[seg1 % M4_EX_SEG_TABLE_MAX]);
+
+    for (size_t i = 0; i < 24; i++)
+    {
+        // SER 1bit data
+        M4_EX_SEG_SER((seg & (0x800000U >> i)) ? 1 : 0);
+        // SRCLK rising edge
+        M4_EX_SEG_SRCLK(0);
+        M4_EX_SEG_SRCLK(1);
+    }
+    // RCLK rising edge
+    M4_EX_SEG_RCLK(0);
+    M4_EX_SEG_RCLK(1);
+}
+
+#endif

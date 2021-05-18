@@ -314,3 +314,22 @@ void M4_EX_ADCKey_Scan(void);
 void M4_EX_ADCKey_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim);
 
 #endif
+
+#ifdef M4_EX_SEG_ENABLE
+
+#define M4_EX_SEG_TABLE_MAX 17
+
+#define M4_EX_SEG_SER(b) HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, (b))
+#define M4_EX_SEG_SRCLK(b) HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, (b))
+#define M4_EX_SEG_RCLK(b) HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, (b))
+
+/**
+ * @brief Set M4 extensions board seg
+ * 
+ * @param seg1 Seg1 value in SegTable
+ * @param seg2 Seg2 value in SegTable
+ * @param seg3 Seg3 Value in SegTable
+ */
+void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3);
+
+#endif
