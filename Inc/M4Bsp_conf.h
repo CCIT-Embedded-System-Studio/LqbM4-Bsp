@@ -35,3 +35,5 @@
 #define M4_EX_ADCKEY_ENABLE
 /******* SEG function *******/
 #define M4_EX_SEG_ENABLE
+/******* DS18B20 temperature sensor function *******/
+#define M4_EX_TS_ENABLE

@@ -119,8 +119,12 @@ int main(void)
   {
     for (size_t i = 0; i < 17; i++)
     {
-      M4_EX_Seg_Set(i,(i + 1)%17,(i+2)%17);
-      HAL_Delay(1000);
+      uint8_t s[22] = {0};
+      M4_EX_TS_Convert();
+      HAL_Delay(100);
+      __IO float r = M4_EX_TS_Read();
+      sprintf((char*)s,"   Temp:%.4f C   ",r);
+      LCD_DisplayStringLine(Line3, s);
     }
     
     /* USER CODE END WHILE */

@@ -305,7 +305,7 @@ ADCKey_t ADCKeyList[M4_EX_ADCKEY_SUM_MAX] = {0};
 // Lsat scanf systick
 static uint32_t ADCKeyLastTick = 0;
 
-__INLINE uint16_t M4_EX_ADCKey_GetValue(void)
+__STATIC_INLINE uint16_t M4_EX_ADCKey_GetValue(void)
 {
 
     HAL_ADC_Start(&hadc2);
@@ -375,6 +375,109 @@ void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3)
     // RCLK rising edge
     M4_EX_SEG_RCLK(0);
     M4_EX_SEG_RCLK(1);
+}
+
+#endif
+
+#ifdef M4_EX_TS_ENABLE
+
+__STATIC_INLINE void Delay_us(uint32_t t)
+{
+    for (size_t i = 0; i < t * 16; i++)
+        __NOP();
+}
+
+__STATIC_INLINE void DS18B20_GPIO_IN(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+__STATIC_INLINE void DS18B20_GPIO_OUT(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+__STATIC_INLINE void DS18B20_GPIO_Write(GPIO_PinState pin)
+{
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, pin);
+}
+
+__STATIC_INLINE GPIO_PinState DS18B20_GPIO_Read(void)
+{
+    return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6);
+}
+
+__STATIC_INLINE void DS18B20_Reset(void)
+{
+    DS18B20_GPIO_OUT();
+    DS18B20_GPIO_Write(GPIO_PIN_RESET);
+    Delay_us(480);
+    DS18B20_GPIO_Write(GPIO_PIN_SET);
+    // Wait ACK
+    DS18B20_GPIO_IN();
+    Delay_us(60);
+    while (DS18B20_GPIO_Read() != GPIO_PIN_RESET)
+        ;
+    Delay_us(270);
+}
+
+__STATIC_INLINE void DS18B20_Write_Byte(uint8_t data)
+{
+    DS18B20_GPIO_OUT();
+    for (size_t i = 0; i < 8; i++)
+    {
+        DS18B20_GPIO_Write(GPIO_PIN_RESET);
+        Delay_us(15);
+        DS18B20_GPIO_Write(
+            (data & (0x01 << i)) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+        Delay_us(15);
+        DS18B20_GPIO_Write(GPIO_PIN_SET);
+    }
+}
+
+__STATIC_INLINE uint8_t DS18B20_Read_Byte(void)
+{
+    uint8_t data = 0x00;
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        DS18B20_GPIO_OUT();
+        DS18B20_GPIO_Write(GPIO_PIN_RESET);
+        Delay_us(1);
+        DS18B20_GPIO_Write(GPIO_PIN_SET);
+        DS18B20_GPIO_IN();
+        Delay_us(15);
+        data |= (DS18B20_GPIO_Read() << i);
+        Delay_us(60);
+    }
+
+    return data;
+}
+
+void M4_EX_TS_Convert(void)
+{
+    DS18B20_Reset();
+    DS18B20_Write_Byte(DS18B20_COMMAND_SKIP_ROM);
+    DS18B20_Write_Byte(DS18B20_COMMAND_CONVERT_TEMP);
+}
+
+float M4_EX_TS_Read(void)
+{
+    DS18B20_Reset();
+    DS18B20_Write_Byte(DS18B20_COMMAND_SKIP_ROM);
+    DS18B20_Write_Byte(DS18B20_COMMAND_READ_SCRTCHPAD);
+
+    uint8_t low = DS18B20_Read_Byte();
+    uint8_t high = DS18B20_Read_Byte();
+
+    float ret = (high << 8 | low) * 0.0625;
+    return ret;
 }
 
 #endif

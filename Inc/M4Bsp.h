@@ -227,6 +227,7 @@ void M4_Res_Write(uint8_t value);
 /**
  * @brief Start input capture for R39 controlled XL555 pulse
  * 
+ * @return void
  */
 void M4_R39IC_Start(void);
 
@@ -244,6 +245,7 @@ uint16_t M4_R39IC_GetPeriod(void);
 /**
  * @brief Start input capture for R40 controlled XL555 pulse
  * 
+ * @return void
  */
 void M4_R40IC_Start(void);
 
@@ -298,8 +300,6 @@ struct ADCKey
 
 typedef struct ADCKey ADCKey_t;
 
-uint16_t M4_EX_ADCKey_GetValue(void);
-
 void M4_EX_ADCKey_Scan(void);
 
 /**
@@ -329,7 +329,31 @@ void M4_EX_ADCKey_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownT
  * @param seg1 Seg1 value in SegTable
  * @param seg2 Seg2 value in SegTable
  * @param seg3 Seg3 Value in SegTable
+ * 
+ * @return void
  */
 void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3);
+
+#endif
+
+#ifdef M4_EX_TS_ENABLE
+
+#define DS18B20_COMMAND_SKIP_ROM 0xCC
+#define DS18B20_COMMAND_CONVERT_TEMP 0x44
+#define DS18B20_COMMAND_READ_SCRTCHPAD 0xBE
+
+/**
+ * @brief Start Temperature Sensor DS18B20 Temperature conversion
+ * 
+ * @return void
+ */
+void M4_EX_TS_Convert(void);
+
+/**
+ * @brief Read temperature sensor convered value
+ * 
+ * @return float Temperature value (Resolution: 0.0625, Celsius)
+ */
+float M4_EX_TS_Read(void);
 
 #endif
