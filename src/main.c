@@ -117,15 +117,6 @@ int main(void)
   LCD_SetTextColor(White);
   while (1)
   {
-    for (size_t i = 0; i < 17; i++)
-    {
-      uint8_t s[22] = {0};
-      M4_EX_TS_Convert();
-      HAL_Delay(100);
-      __IO float r = M4_EX_TS_Read();
-      sprintf((char*)s,"   Temp:%.4f C   ",r);
-      LCD_DisplayStringLine(Line3, s);
-    }
     
     /* USER CODE END WHILE */
 

@@ -37,3 +37,5 @@
 #define M4_EX_SEG_ENABLE
 /******* DS18B20 temperature sensor function *******/
 #define M4_EX_TS_ENABLE
+/******* DHT11 Temperature and humidity sensor function *******/
+#define M4_EX_THS_ENABLE

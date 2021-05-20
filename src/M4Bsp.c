@@ -379,7 +379,7 @@ void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3)
 
 #endif
 
-#ifdef M4_EX_TS_ENABLE
+#if (defined(M4_EX_TS_ENABLE) || defined(M4_EX_THS_ENABLE))
 
 __STATIC_INLINE void Delay_us(uint32_t t)
 {
@@ -387,42 +387,52 @@ __STATIC_INLINE void Delay_us(uint32_t t)
         __NOP();
 }
 
-__STATIC_INLINE void DS18B20_GPIO_IN(void)
+__STATIC_INLINE void OneWire_Gpio_In(GPIO_TypeDef *Port, uint16_t Pin)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pin = GPIO_PIN_6;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = Pin;
+    HAL_GPIO_Init(Port, &GPIO_InitStruct);
 }
 
-__STATIC_INLINE void DS18B20_GPIO_OUT(void)
+__STATIC_INLINE void OneWire_Gpio_Out(GPIO_TypeDef *Port, uint16_t Pin)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pin = GPIO_PIN_6;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = Pin;
+    HAL_GPIO_Init(Port, &GPIO_InitStruct);
 }
 
-__STATIC_INLINE void DS18B20_GPIO_Write(GPIO_PinState pin)
+__STATIC_INLINE void OneWire_Gpio_Write(GPIO_TypeDef *Port, uint16_t Pin, GPIO_PinState State)
 {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, pin);
+    HAL_GPIO_WritePin(Port, Pin, State);
 }
 
-__STATIC_INLINE GPIO_PinState DS18B20_GPIO_Read(void)
+__STATIC_INLINE GPIO_PinState OneWire_Gpio_Read(GPIO_TypeDef *Port, uint16_t Pin)
 {
-    return HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6);
+    return HAL_GPIO_ReadPin(Port, Pin);
 }
+
+#endif
+
+#ifdef M4_EX_TS_ENABLE
+
+#define DS18B20_GPIO_IN() OneWire_Gpio_In(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN)
+#define DS18B20_GPIO_OUT() OneWire_Gpio_Out(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN)
+
+#define DS18B20_GPIO_READ() OneWire_Gpio_Read(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN)
+#define DS18B20_GPIO_WRITE(x) OneWire_Gpio_Write(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN, x)
 
 __STATIC_INLINE void DS18B20_Reset(void)
 {
     DS18B20_GPIO_OUT();
-    DS18B20_GPIO_Write(GPIO_PIN_RESET);
+    DS18B20_GPIO_WRITE(GPIO_PIN_RESET);
     Delay_us(480);
-    DS18B20_GPIO_Write(GPIO_PIN_SET);
+    DS18B20_GPIO_WRITE(GPIO_PIN_SET);
     // Wait ACK
     DS18B20_GPIO_IN();
     Delay_us(60);
-    while (DS18B20_GPIO_Read() != GPIO_PIN_RESET)
+    while (DS18B20_GPIO_READ() != GPIO_PIN_RESET)
         ;
     Delay_us(270);
 }
@@ -432,12 +442,12 @@ __STATIC_INLINE void DS18B20_Write_Byte(uint8_t data)
     DS18B20_GPIO_OUT();
     for (size_t i = 0; i < 8; i++)
     {
-        DS18B20_GPIO_Write(GPIO_PIN_RESET);
+        DS18B20_GPIO_WRITE(GPIO_PIN_RESET);
         Delay_us(15);
-        DS18B20_GPIO_Write(
+        DS18B20_GPIO_WRITE(
             (data & (0x01 << i)) ? GPIO_PIN_SET : GPIO_PIN_RESET);
         Delay_us(15);
-        DS18B20_GPIO_Write(GPIO_PIN_SET);
+        DS18B20_GPIO_WRITE(GPIO_PIN_SET);
     }
 }
 
@@ -448,12 +458,12 @@ __STATIC_INLINE uint8_t DS18B20_Read_Byte(void)
     for (size_t i = 0; i < 8; i++)
     {
         DS18B20_GPIO_OUT();
-        DS18B20_GPIO_Write(GPIO_PIN_RESET);
+        DS18B20_GPIO_WRITE(GPIO_PIN_RESET);
         Delay_us(1);
-        DS18B20_GPIO_Write(GPIO_PIN_SET);
+        DS18B20_GPIO_WRITE(GPIO_PIN_SET);
         DS18B20_GPIO_IN();
         Delay_us(15);
-        data |= (DS18B20_GPIO_Read() << i);
+        data |= (DS18B20_GPIO_READ() << i);
         Delay_us(60);
     }
 
@@ -478,6 +488,65 @@ float M4_EX_TS_Read(void)
 
     float ret = (high << 8 | low) * 0.0625;
     return ret;
+}
+
+#endif
+
+#ifdef M4_EX_THS_ENABLE
+
+#define DHT11_GPIO_IN() OneWire_Gpio_In(DHT11_GPIO_PORT, DHT11_GPIO_PIN)
+#define DHT11_GPIO_OUT() OneWire_Gpio_Out(DHT11_GPIO_PORT, DHT11_GPIO_PIN)
+
+#define DHT11_GPIO_READ() OneWire_Gpio_Read(DHT11_GPIO_PORT, DHT11_GPIO_PIN)
+#define DHT11_GPIO_WRITE(x) OneWire_Gpio_Write(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN, x)
+
+__STATIC_INLINE void DHT11_Reset(void)
+{
+    DHT11_GPIO_OUT();
+    // DHT11_GPIO_WRITE(GPIO_PIN_SET);
+    DHT11_GPIO_WRITE(GPIO_PIN_RESET);
+    HAL_Delay(18);
+    DHT11_GPIO_WRITE(GPIO_PIN_SET);
+    Delay_us(20);
+    // Check DHT11 response
+    DHT11_GPIO_IN();
+    while (DHT11_GPIO_READ() != GPIO_PIN_RESET)
+        ;
+    while (DHT11_GPIO_READ() != GPIO_PIN_SET)
+        ;
+    while (DHT11_GPIO_READ() != GPIO_PIN_RESET)
+        ;
+}
+
+__STATIC_INLINE uint8_t DHT11_Read_Byte(void)
+{
+    uint8_t data = 0x00;
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        while (DHT11_GPIO_READ() != GPIO_PIN_SET)
+            ;
+        // Check data
+        uint32_t count = 0;
+        while (DHT11_GPIO_READ() != GPIO_PIN_RESET)
+            ++count;
+        // Recvice 1 bit data
+        if (count > 300)
+            data |= (0x80 >> i);
+    }
+
+    return data;
+}
+
+void M4_EX_THS_Read(uint8_t *temp, uint8_t *humi)
+{
+    uint8_t data[4] = {0};
+
+    DHT11_Reset();
+    for (size_t i = 0; i < 4; i++)
+        data[i] = DHT11_Read_Byte();
+    *humi = data[0];
+    *temp = data[2];
 }
 
 #endif

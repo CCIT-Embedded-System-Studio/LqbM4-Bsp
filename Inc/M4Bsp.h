@@ -338,6 +338,9 @@ void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3);
 
 #ifdef M4_EX_TS_ENABLE
 
+#define DS18B20_GPIO_PORT GPIOA
+#define DS18B20_GPIO_PIN GPIO_PIN_6
+
 #define DS18B20_COMMAND_SKIP_ROM 0xCC
 #define DS18B20_COMMAND_CONVERT_TEMP 0x44
 #define DS18B20_COMMAND_READ_SCRTCHPAD 0xBE
@@ -350,10 +353,27 @@ void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3);
 void M4_EX_TS_Convert(void);
 
 /**
- * @brief Read temperature sensor convered value
+ * @brief Read temperature sensor DS18B20 convered value
  * 
  * @return float Temperature value (Resolution: 0.0625, Celsius)
  */
 float M4_EX_TS_Read(void);
+
+#endif
+
+#ifdef M4_EX_THS_ENABLE
+
+#define DHT11_GPIO_PORT GPIOA
+#define DHT11_GPIO_PIN GPIO_PIN_7
+
+/**
+ * @brief Read Temperature and humidity sensor DHT11 value
+ * 
+ * @param temp DHT11 temperature value
+ * @param humi DHT11 humidity value
+ * 
+ * @return void
+ */
+void M4_EX_THS_Read(uint8_t *temp, uint8_t *humi);
 
 #endif
