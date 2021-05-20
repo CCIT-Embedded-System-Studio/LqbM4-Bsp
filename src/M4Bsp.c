@@ -417,11 +417,11 @@ __STATIC_INLINE GPIO_PinState OneWire_Gpio_Read(GPIO_TypeDef *Port, uint16_t Pin
 
 #ifdef M4_EX_TS_ENABLE
 
-#define DS18B20_GPIO_IN() OneWire_Gpio_In(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN)
-#define DS18B20_GPIO_OUT() OneWire_Gpio_Out(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN)
+#define DS18B20_GPIO_IN() OneWire_Gpio_In(M4_EX_DS18B20_GPIO_PORT, M4_EX_DS18B20_GPIO_PIN)
+#define DS18B20_GPIO_OUT() OneWire_Gpio_Out(M4_EX_DS18B20_GPIO_PORT, M4_EX_DS18B20_GPIO_PIN)
 
-#define DS18B20_GPIO_READ() OneWire_Gpio_Read(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN)
-#define DS18B20_GPIO_WRITE(x) OneWire_Gpio_Write(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN, x)
+#define DS18B20_GPIO_READ() OneWire_Gpio_Read(M4_EX_DS18B20_GPIO_PORT, M4_EX_DS18B20_GPIO_PIN)
+#define DS18B20_GPIO_WRITE(x) OneWire_Gpio_Write(M4_EX_DS18B20_GPIO_PORT, M4_EX_DS18B20_GPIO_PIN, x)
 
 __STATIC_INLINE void DS18B20_Reset(void)
 {
@@ -473,15 +473,15 @@ __STATIC_INLINE uint8_t DS18B20_Read_Byte(void)
 void M4_EX_TS_Convert(void)
 {
     DS18B20_Reset();
-    DS18B20_Write_Byte(DS18B20_COMMAND_SKIP_ROM);
-    DS18B20_Write_Byte(DS18B20_COMMAND_CONVERT_TEMP);
+    DS18B20_Write_Byte(M4_EX_DS18B20_COMMAND_SKIP_ROM);
+    DS18B20_Write_Byte(M4_EX_DS18B20_COMMAND_CONVERT_TEMP);
 }
 
 float M4_EX_TS_Read(void)
 {
     DS18B20_Reset();
-    DS18B20_Write_Byte(DS18B20_COMMAND_SKIP_ROM);
-    DS18B20_Write_Byte(DS18B20_COMMAND_READ_SCRTCHPAD);
+    DS18B20_Write_Byte(M4_EX_DS18B20_COMMAND_SKIP_ROM);
+    DS18B20_Write_Byte(M4_EX_DS18B20_COMMAND_READ_SCRTCHPAD);
 
     uint8_t low = DS18B20_Read_Byte();
     uint8_t high = DS18B20_Read_Byte();
@@ -494,11 +494,11 @@ float M4_EX_TS_Read(void)
 
 #ifdef M4_EX_THS_ENABLE
 
-#define DHT11_GPIO_IN() OneWire_Gpio_In(DHT11_GPIO_PORT, DHT11_GPIO_PIN)
-#define DHT11_GPIO_OUT() OneWire_Gpio_Out(DHT11_GPIO_PORT, DHT11_GPIO_PIN)
+#define DHT11_GPIO_IN() OneWire_Gpio_In(M4_EX_DHT11_GPIO_PORT, M4_EX_DHT11_GPIO_PIN)
+#define DHT11_GPIO_OUT() OneWire_Gpio_Out(M4_EX_DHT11_GPIO_PORT, M4_EX_DHT11_GPIO_PIN)
 
-#define DHT11_GPIO_READ() OneWire_Gpio_Read(DHT11_GPIO_PORT, DHT11_GPIO_PIN)
-#define DHT11_GPIO_WRITE(x) OneWire_Gpio_Write(DS18B20_GPIO_PORT, DS18B20_GPIO_PIN, x)
+#define DHT11_GPIO_READ() OneWire_Gpio_Read(M4_EX_DHT11_GPIO_PORT, M4_EX_DHT11_GPIO_PIN)
+#define DHT11_GPIO_WRITE(x) OneWire_Gpio_Write(M4_EX_DHT11_GPIO_PORT, M4_EX_DHT11_GPIO_PIN, x)
 
 __STATIC_INLINE void DHT11_Reset(void)
 {
@@ -547,6 +547,29 @@ void M4_EX_THS_Read(uint8_t *temp, uint8_t *humi)
         data[i] = DHT11_Read_Byte();
     *humi = data[0];
     *temp = data[2];
+}
+
+#endif
+
+#ifdef M4_EX_LS_ENABLE
+
+extern ADC_HandleTypeDef hadc2;
+
+__INLINE uint16_t M4_EX_LS_GetValueA(void)
+{
+    HAL_ADC_Start(&hadc2);
+    uint16_t ret = (HAL_ADC_GetValue(&hadc2) / 4095.0) * M4_R37_BASE_VOLT;
+    HAL_ADC_Stop(&hadc2);
+    return ret;
+}
+
+__INLINE GPIO_PinState M4_EX_LS_GetValueD(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pin = M4_EX_LS_GPIO_PIN;
+    HAL_GPIO_Init(M4_EX_LS_GPIO_PORT, &GPIO_InitStruct);
+    return HAL_GPIO_ReadPin(M4_EX_LS_GPIO_PORT, M4_EX_LS_GPIO_PIN);
 }
 
 #endif

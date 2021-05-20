@@ -338,12 +338,12 @@ void M4_EX_Seg_Set(uint8_t seg1, uint8_t seg2, uint8_t seg3);
 
 #ifdef M4_EX_TS_ENABLE
 
-#define DS18B20_GPIO_PORT GPIOA
-#define DS18B20_GPIO_PIN GPIO_PIN_6
+#define M4_EX_DS18B20_GPIO_PORT GPIOA
+#define M4_EX_DS18B20_GPIO_PIN GPIO_PIN_6
 
-#define DS18B20_COMMAND_SKIP_ROM 0xCC
-#define DS18B20_COMMAND_CONVERT_TEMP 0x44
-#define DS18B20_COMMAND_READ_SCRTCHPAD 0xBE
+#define M4_EX_DS18B20_COMMAND_SKIP_ROM 0xCC
+#define M4_EX_DS18B20_COMMAND_CONVERT_TEMP 0x44
+#define M4_EX_DS18B20_COMMAND_READ_SCRTCHPAD 0xBE
 
 /**
  * @brief Start Temperature Sensor DS18B20 Temperature conversion
@@ -363,8 +363,8 @@ float M4_EX_TS_Read(void);
 
 #ifdef M4_EX_THS_ENABLE
 
-#define DHT11_GPIO_PORT GPIOA
-#define DHT11_GPIO_PIN GPIO_PIN_7
+#define M4_EX_DHT11_GPIO_PORT GPIOA
+#define M4_EX_DHT11_GPIO_PIN GPIO_PIN_7
 
 /**
  * @brief Read Temperature and humidity sensor DHT11 value
@@ -375,5 +375,34 @@ float M4_EX_TS_Read(void);
  * @return void
  */
 void M4_EX_THS_Read(uint8_t *temp, uint8_t *humi);
+
+#endif
+
+#ifdef M4_EX_LS_ENABLE
+
+#ifndef M4_EX_LS_BASE_VOLT
+#define M4_EX_LS_BASE_VOLT 3.3
+#endif
+
+#define M4_EX_LS_GPIO_PORT GPIOA
+#define M4_EX_LS_GPIO_PIN GPIO_PIN_3
+
+/**
+ * @brief Get Light sensor adc analog value
+ * 
+ * @param void
+ * 
+ * @return uint16_t Light sensor analog value in 0 ~ M4_EX_LS_BASE_VOLT
+ */
+uint16_t M4_EX_LS_GetValueA(void);
+
+/**
+ * @brief Get Light sensor adc digital value
+ * 
+ * @param void
+ * 
+ * @return GPIO_PinState Light sensor analog value in 0 or 1
+ */
+GPIO_PinState M4_EX_LS_GetValueD(void);
 
 #endif

@@ -39,3 +39,5 @@
 #define M4_EX_TS_ENABLE
 /******* DHT11 Temperature and humidity sensor function *******/
 #define M4_EX_THS_ENABLE
+/******* Light sensor function *******/
+#define M4_EX_LS_ENABLE
