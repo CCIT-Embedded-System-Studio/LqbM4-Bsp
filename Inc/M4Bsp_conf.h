@@ -16,7 +16,7 @@
 /******* Key function(B1,B2,B3,B4) *******/
 #define M4_KEY_ENABLE
 /******* R37 resistance function *******/
-#define M4_R37_ENABLE 
+#define M4_R37_ENABLE
 /******* R38 resistance function *******/
 #define M4_R38_ENABLE
 /******* UART function *******/

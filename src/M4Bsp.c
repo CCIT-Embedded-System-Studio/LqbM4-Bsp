@@ -82,10 +82,10 @@ __weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t Down
 
 extern ADC_HandleTypeDef hadc2;
 
-__INLINE uint16_t M4_R37_GetValue(void)
+__INLINE float M4_R37_GetValue(void)
 {
     HAL_ADC_Start(&hadc2);
-    uint16_t ret = (HAL_ADC_GetValue(&hadc2) / 4095.0) * M4_R37_BASE_VOLT;
+    float ret = (HAL_ADC_GetValue(&hadc2) / 4095.0) * M4_R37_BASE_VOLT;
     HAL_ADC_Stop(&hadc2);
     return ret;
 }
@@ -96,10 +96,10 @@ __INLINE uint16_t M4_R37_GetValue(void)
 
 extern ADC_HandleTypeDef hadc1;
 
-__INLINE uint16_t M4_R38_GetValue(void)
+__INLINE float M4_R38_GetValue(void)
 {
     HAL_ADC_Start(&hadc1);
-    uint16_t ret = (HAL_ADC_GetValue(&hadc1) / 4095.0) * M4_R38_BASE_VOLT;
+    float ret = (HAL_ADC_GetValue(&hadc1) / 4095.0) * M4_R38_BASE_VOLT;
     HAL_ADC_Stop(&hadc1);
     return ret;
 }
@@ -236,6 +236,11 @@ __INLINE void M4_R39IC_Start(void)
     HAL_TIM_IC_Start_IT(&htim16, TIM_CHANNEL_1);
 }
 
+__INLINE void M4_R39IC_Stop(void)
+{
+    HAL_TIM_IC_Stop_IT(&htim16, TIM_CHANNEL_1);
+}
+
 __INLINE uint16_t M4_R39IC_GetPeriod(void)
 {
     return R39ICPeriod;
@@ -254,6 +259,11 @@ __INLINE void M4_R40IC_Start(void)
 {
     __HAL_TIM_SET_PRESCALER(&htim8, 80 - 1);
     HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1);
+}
+
+__INLINE void M4_R40IC_Stop(void)
+{
+    HAL_TIM_IC_Stop_IT(&htim8, TIM_CHANNEL_1);
 }
 
 __INLINE uint16_t M4_R40IC_GetPeriod(void)
@@ -425,6 +435,7 @@ __STATIC_INLINE GPIO_PinState OneWire_Gpio_Read(GPIO_TypeDef *Port, uint16_t Pin
 
 __STATIC_INLINE void DS18B20_Reset(void)
 {
+    uint8_t Timout = 10;
     DS18B20_GPIO_OUT();
     DS18B20_GPIO_WRITE(GPIO_PIN_RESET);
     Delay_us(480);
@@ -433,7 +444,13 @@ __STATIC_INLINE void DS18B20_Reset(void)
     DS18B20_GPIO_IN();
     Delay_us(60);
     while (DS18B20_GPIO_READ() != GPIO_PIN_RESET)
-        ;
+    {
+        Delay_us(1);
+        --Timout;
+        if (Timout == 0)
+            return;
+    }
+
     Delay_us(270);
 }
 
@@ -502,6 +519,8 @@ float M4_EX_TS_Read(void)
 
 __STATIC_INLINE void DHT11_Reset(void)
 {
+    uint16_t Timout = 1000;
+
     DHT11_GPIO_OUT();
     // DHT11_GPIO_WRITE(GPIO_PIN_SET);
     DHT11_GPIO_WRITE(GPIO_PIN_RESET);
@@ -511,21 +530,44 @@ __STATIC_INLINE void DHT11_Reset(void)
     // Check DHT11 response
     DHT11_GPIO_IN();
     while (DHT11_GPIO_READ() != GPIO_PIN_RESET)
-        ;
+    {
+        Delay_us(1);
+        --Timout;
+        if (Timout == 0)
+            return;
+    }
+    Timout = 1000;
     while (DHT11_GPIO_READ() != GPIO_PIN_SET)
-        ;
+    {
+        Delay_us(1);
+        --Timout;
+        if (Timout == 0)
+            return;
+    }
+    Timout = 1000;
     while (DHT11_GPIO_READ() != GPIO_PIN_RESET)
-        ;
+    {
+        Delay_us(1);
+        --Timout;
+        if (Timout == 0)
+            return;
+    }
 }
 
 __STATIC_INLINE uint8_t DHT11_Read_Byte(void)
 {
+    uint16_t Timout = 1000;
     uint8_t data = 0x00;
 
     for (size_t i = 0; i < 8; i++)
     {
         while (DHT11_GPIO_READ() != GPIO_PIN_SET)
-            ;
+        {
+            Delay_us(1);
+            --Timout;
+            if (Timout == 0)
+                return 0x00;
+        }
         // Check data
         uint32_t count = 0;
         while (DHT11_GPIO_READ() != GPIO_PIN_RESET)

@@ -123,9 +123,9 @@ void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim);
  * 
  * @param void
  * 
- * @return uint16_t R37 value in 0 ~ M4_R37_BASE_VOLT
+ * @return float R37 value in 0 ~ M4_R37_BASE_VOLT
  */
-uint16_t M4_R37_GetValue(void);
+float M4_R37_GetValue(void);
 
 #endif
 
@@ -140,9 +140,9 @@ uint16_t M4_R37_GetValue(void);
  * 
  * @param void
  * 
- * @return uint16_t R38 value in 0 ~ M4_R38_BASE_VOLT
+ * @return float R38 value in 0 ~ M4_R38_BASE_VOLT
  */
-uint16_t M4_R38_GetValue(void);
+float M4_R38_GetValue(void);
 
 #endif
 
@@ -232,6 +232,13 @@ void M4_Res_Write(uint8_t value);
 void M4_R39IC_Start(void);
 
 /**
+ * @brief Stop input capture
+ * 
+ * @return void
+ */
+void M4_R39IC_Stop(void);
+
+/**
  * @brief Get R39 controlled XL555 pulse period(us)
  * 
  * @return uint16_t pulse freq (Hz)
@@ -248,6 +255,13 @@ uint16_t M4_R39IC_GetPeriod(void);
  * @return void
  */
 void M4_R40IC_Start(void);
+
+/**
+ * @brief Stop input capture
+ * 
+ * @return void
+ */
+void M4_R40IC_Stop(void);
 
 /**
  * @brief Get R40 controlled XL555 pulse period(us)
@@ -305,7 +319,7 @@ void M4_EX_ADCKey_Scan(void);
 /**
  * @brief Rewrite by user, this function in M4_EX_ADCKey_Scan() call
  * 
- * @param KeyID Key id, value can is M4_KEY_B1
+ * @param KeyID Key id, value can is 1 ~ 8
  * @param KeyStatus Now keys's status
  * @param DownTim The number of milliseconds(ms) to press the button
  * 

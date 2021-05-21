@@ -51,7 +51,7 @@ UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
-
+uint8_t LEDStatus = 0x00;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,10 +61,10 @@ static void MX_DMA_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_TIM8_Init(void);
 static void MX_TIM16_Init(void);
+static void MX_TIM8_Init(void);
 /* USER CODE BEGIN PFP */
-uint8_t KeyClick = 0x00;
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,8 +103,8 @@ int main(void)
   MX_ADC2_Init();
   MX_ADC1_Init();
   MX_USART1_UART_Init();
-  MX_TIM8_Init();
   MX_TIM16_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -115,9 +115,59 @@ int main(void)
   LCD_Clear(Black);
   LCD_SetBackColor(Black);
   LCD_SetTextColor(White);
+
+  char str[23] = "   Test Program  ";
+  float DS18B20 = 0;
+  uint8_t DHT11[2] = {0};
+  uint16_t ICPeriod[2] = {0};
+  float ADCR38 = 0;
+
+  uint32_t DHT11LastTick = 0, DHT11NowTick = 0;
+
+  LCD_DisplayStringLine(Line0, (uint8_t *)str);
   while (1)
   {
-    
+    // Keys Test
+    M4_Key_Scan();
+
+    // ADC Keys Test
+    M4_EX_ADCKey_Scan();
+
+    // Input capture(R39 R40)
+    M4_R39IC_Start();
+    M4_R40IC_Start();
+    HAL_Delay(2);
+    ICPeriod[0] = M4_R39IC_GetPeriod();
+    ICPeriod[1] = M4_R40IC_GetPeriod();
+    M4_R39IC_Stop();
+    M4_R40IC_Stop();
+
+    sprintf(str, " R39:%d R40:%d  ", ICPeriod[0], ICPeriod[1]);
+    LCD_DisplayStringLine(Line2, (uint8_t *)str);
+
+    // ADC Test
+    ADCR38 = M4_R38_GetValue();
+    sprintf(str, " R38:%.2fV         ", ADCR38);
+    LCD_DisplayStringLine(Line3, (uint8_t *)str);
+
+    // DS18B20 Test
+    M4_EX_TS_Convert();
+    DS18B20 = M4_EX_TS_Read();
+
+    sprintf(str, " DS18B20:%.4f    ", DS18B20);
+    LCD_DisplayStringLine(Line5, (uint8_t *)str);
+
+    // DHT11 Test
+    DHT11NowTick = HAL_GetTick();
+    if(DHT11NowTick - DHT11LastTick > 1000)
+    {
+      M4_EX_THS_Read(DHT11, DHT11 + 1);
+      DHT11LastTick = DHT11NowTick;
+    }
+
+    sprintf(str, " DHT11:%dC  %d%%  ", DHT11[0], DHT11[1]);
+    LCD_DisplayStringLine(Line6, (uint8_t *)str);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -321,7 +371,7 @@ static void MX_TIM8_Init(void)
 
   /* USER CODE END TIM8_Init 1 */
   htim8.Instance = TIM8;
-  htim8.Init.Prescaler = 80-1;
+  htim8.Init.Prescaler = 0;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim8.Init.Period = 65535;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -379,7 +429,7 @@ static void MX_TIM16_Init(void)
 
   /* USER CODE END TIM16_Init 1 */
   htim16.Instance = TIM16;
-  htim16.Init.Prescaler = 80-1;
+  htim16.Init.Prescaler = 0;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim16.Init.Period = 65535;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -555,7 +605,43 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim) 
+{
+  char str[22] = {0};
+  if(KeyStatus == M4_KEY_DOWN)
+  {
+    if(DownTim > 1000)// Now long down
+      sprintf(str, " B%d Now Long Down ", KeyID);
+  }
+  else
+  {
+    if(DownTim > 1000)// Long click
+      sprintf(str, " B%d Long Click    ", KeyID);
+    else// Short cilck
+      sprintf(str, " B%d Short cilck   ", KeyID);
+  }
+  LCD_DisplayStringLine(Line8, (uint8_t *)str);
+}
 
+void M4_EX_ADCKey_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim)
+{
+  uint8_t mask = (0x01 << (KeyID - 1));
+  if(KeyStatus == M4_KEY_DOWN)
+  {
+    if(DownTim > 1000)// Now long down
+      LEDStatus ^= mask;
+    else
+      LEDStatus |= mask;
+  }
+  else
+  {
+    if(DownTim > 1000)// Long click
+      LEDStatus = mask;
+    else// Short cilck
+      LEDStatus -= mask;
+  }
+  M4_Led_Set(LEDStatus << 8);
+}
 /* USER CODE END 4 */
 
 /**
