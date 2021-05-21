@@ -1,7 +1,7 @@
 /**
  * @file M4Bsp.h
  * @author RealEyex (none)
- * @brief 
+ * @brief M4 board function declaration
  * @version 0.1
  * @date 2021-04-22
  * 
@@ -13,7 +13,7 @@
 #pragma once
 
 #include "M4Bsp_conf.h"
-#include "stm32g4xx_hal.h"
+#include "Features.h"
 #include "stdio.h"
 #include "string.h"
 #include "i2c.h"

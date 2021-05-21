@@ -1,7 +1,7 @@
 /**
  * @file M4Bsp.c
  * @author RealEyex (none)
- * @brief 
+ * @brief M4 board function definition
  * @version 0.1
  * @date 2021-04-22
  * 
@@ -41,12 +41,12 @@ static KeyInfo_t KeyList[M4_KEY_SUM_MAX] = {
     {M4_KEY_B4_PORT, M4_KEY_B4_PIN, M4_KEY_UP, 0x00}};
 
 // Lsat scanf systick
-static uint32_t KeyLastTick = 0;
+static uint32_t SKeyLastTick = 0;
 
 void M4_Key_Scan(void)
 {
     uint32_t NowTick = HAL_GetTick();
-    if (NowTick - KeyLastTick < M4_KEY_SCAN_DELAY)
+    if (NowTick - SKeyLastTick < M4_KEY_SCAN_DELAY)
         return;
 
     for (size_t i = 0; i < M4_KEY_SUM_MAX; i++)
@@ -64,14 +64,14 @@ void M4_Key_Scan(void)
         {
             if (KeyList[i].Status == M4_KEY_DOWN)
             {
-                KeyList[i].TimCount += ABS(((int64_t)NowTick - KeyLastTick));
+                KeyList[i].TimCount += ABS(((int64_t)NowTick - SKeyLastTick));
                 M4_Key_Scan_Callback(i + 1, M4_KEY_DOWN, KeyList[i].TimCount);
             }
             KeyList[i].Status = M4_KEY_DOWN;
         }
     }
 
-    KeyLastTick = NowTick;
+    SKeyLastTick = NowTick;
 }
 
 __weak void M4_Key_Scan_Callback(uint8_t KeyID, uint8_t KeyStatus, uint32_t DownTim) {}
