@@ -2,7 +2,7 @@
  * @file M4Bsp.h
  * @author RealEyex (none)
  * @brief 
- * @version 0.1
+ * @version 1.1
  * @date 2021-04-22
  * 
  * @copyright Copyright (c) 2021 CCIT Embedded System Studio
@@ -83,14 +83,14 @@ void M4_Led_Set(uint16_t led);
 #define M4_KEY_B4 0x04
 
 // Save key info
-struct KeyInfo
+struct Key
 {
     GPIO_TypeDef *Port;
     uint16_t Pin;
     uint8_t Status;
     uint32_t TimCount;
 };
-typedef struct KeyInfo KeyInfo_t;
+typedef struct Key Key_t;
 
 /**
  * @brief Scan M4 board key status
@@ -292,14 +292,14 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 #define M4_EX_ADCKEY_S7 0x07
 #define M4_EX_ADCKEY_S8 0x08
 
-#define M4_EX_ADCKEY_S1_ADCVALUE 0
-#define M4_EX_ADCKEY_S2_ADCVALUE 200  // 140
-#define M4_EX_ADCKEY_S3_ADCVALUE 600  // 540
-#define M4_EX_ADCKEY_S4_ADCVALUE 1000 // 960
-#define M4_EX_ADCKEY_S5_ADCVALUE 1400 // 1320
-#define M4_EX_ADCKEY_S6_ADCVALUE 1800 // 1760
-#define M4_EX_ADCKEY_S7_ADCVALUE 2300 // 2230
-#define M4_EX_ADCKEY_S8_ADCVALUE 2800 // 2780
+#define M4_EX_ADCKEY_S1_ADCVALUE 100  // 0
+#define M4_EX_ADCKEY_S2_ADCVALUE 300  // 140
+#define M4_EX_ADCKEY_S3_ADCVALUE 700  // 540
+#define M4_EX_ADCKEY_S4_ADCVALUE 1100 // 960
+#define M4_EX_ADCKEY_S5_ADCVALUE 1500 // 1320
+#define M4_EX_ADCKEY_S6_ADCVALUE 1900 // 1760
+#define M4_EX_ADCKEY_S7_ADCVALUE 2400 // 2230
+#define M4_EX_ADCKEY_S8_ADCVALUE 2900 // 2780
 
 #define M4_EX_ADCKEY_UP 0x00
 #define M4_EX_ADCKEY_DOWN 0x01

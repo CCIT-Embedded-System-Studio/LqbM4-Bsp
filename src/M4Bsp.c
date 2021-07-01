@@ -2,7 +2,7 @@
  * @file M4Bsp.c
  * @author RealEyex (none)
  * @brief 
- * @version 0.1
+ * @version 1.1
  * @date 2021-04-22
  * 
  * @copyright Copyright (c) 2021 CCIT Embedded System Studio
@@ -34,7 +34,7 @@ __INLINE void M4_Led_Set(uint16_t led)
 
 #ifdef M4_KEY_ENABLE
 
-static KeyInfo_t KeyList[M4_KEY_SUM_MAX] = {
+static Key_t KeyList[M4_KEY_SUM_MAX] = {
     {M4_KEY_B1_PORT, M4_KEY_B1_PIN, M4_KEY_UP, 0x00},
     {M4_KEY_B2_PORT, M4_KEY_B2_PIN, M4_KEY_UP, 0x00},
     {M4_KEY_B3_PORT, M4_KEY_B3_PIN, M4_KEY_UP, 0x00},
@@ -86,7 +86,6 @@ __INLINE float M4_R37_GetValue(void)
 {
     HAL_ADC_Start(&hadc2);
     float ret = (HAL_ADC_GetValue(&hadc2) / 4095.0) * M4_R37_BASE_VOLT;
-    HAL_ADC_Stop(&hadc2);
     return ret;
 }
 
@@ -100,7 +99,6 @@ __INLINE float M4_R38_GetValue(void)
 {
     HAL_ADC_Start(&hadc1);
     float ret = (HAL_ADC_GetValue(&hadc1) / 4095.0) * M4_R38_BASE_VOLT;
-    HAL_ADC_Stop(&hadc1);
     return ret;
 }
 
@@ -320,7 +318,6 @@ __STATIC_INLINE uint16_t M4_EX_ADCKey_GetValue(void)
 
     HAL_ADC_Start(&hadc2);
     uint16_t ret = HAL_ADC_GetValue(&hadc2);
-    HAL_ADC_Stop(&hadc2);
     return ret;
 }
 
@@ -328,9 +325,6 @@ void M4_EX_ADCKey_Scan(void)
 {
     uint32_t ADCKeyNowTick = HAL_GetTick();
     uint16_t ADCKeyValue = M4_EX_ADCKey_GetValue();
-
-    if (ADCKeyNowTick - ADCKeyLastTick < M4_EX_ADCKEY_SCAN_DELAY)
-        return;
 
     for (size_t i = 0; i < M4_EX_ADCKEY_SUM_MAX; i++)
     {
@@ -343,7 +337,7 @@ void M4_EX_ADCKey_Scan(void)
                 M4_EX_ADCKey_Scan_Callback(i + 1, M4_EX_ADCKEY_DOWN, ADCKeyList[i].TimCount);
             }
             ADCKeyList[i].Status = M4_EX_ADCKEY_DOWN;
-            ADCKeyValue = 0xffff;
+            break;
         }
         else
         {

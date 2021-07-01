@@ -2,7 +2,7 @@
  * @file M4Bsp_conf.h
  * @author RealEyex (none)
  * @brief This content of this file is the macro definition related to the board
- * @version 0.1
+ * @version 1.1
  * @date 2021-04-22
  * 
  * @copyright Copyright (c) 2021 CCIT Embedded System Studio
